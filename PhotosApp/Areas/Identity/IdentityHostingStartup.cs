@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PhotosApp.Areas.Identity.Data;
+using PhotosApp.Services;
 
 [assembly: HostingStartup(typeof(PhotosApp.Areas.Identity.IdentityHostingStartup))]
 namespace PhotosApp.Areas.Identity
@@ -19,9 +20,24 @@ namespace PhotosApp.Areas.Identity
                     options.UseSqlite(
                         context.Configuration.GetConnectionString("UsersDbContextConnection")));
 
-                services.AddDefaultIdentity<PhotosAppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                services.AddDefaultIdentity<PhotosAppUser>(options =>
+                    {
+                        options.Password.RequireDigit = false; 
+                        options.Password.RequireLowercase = true; 
+                        options.Password.RequireUppercase = false; 
+                        options.Password.RequireNonAlphanumeric = false; 
+                        //**
+                        //options.Password.RequiredLength = 8; 
+                        //options.Password.RequiredUniqueChars = 1; 
+                        
+                        options.SignIn.RequireConfirmedAccount = false; 
+                        //options.SignIn.RequireConfirmedEmail = true; 
+                        //
+                    })
+                    .AddPasswordValidator<UsernameAsPasswordValidator<PhotosAppUser>>()
                     .AddEntityFrameworkStores<UsersDbContext>();
             });
         }
     }
+
 }
