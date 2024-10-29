@@ -27,9 +27,11 @@ namespace PhotosApp.Services
         {
             byte[] expectedHashBytes = null;
             byte[] actualHashBytes = null;
-
-            throw new NotImplementedException();
-
+            var hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
+            var saltBytes = hashedPasswordBytes.Take(SaltSizeInBits / 8).ToArray();
+            expectedHashBytes = hashedPasswordBytes.Skip(SaltSizeInBits / 8).ToArray();
+            actualHashBytes = GetHashBytes(providedPassword, saltBytes);
+            
             // Если providedPassword корректен, то в результате хэширования его с той же самой солью,
             // что и оригинальный пароль, должен получаться тот же самый хэш.
             return AreByteArraysEqual(actualHashBytes, expectedHashBytes)
