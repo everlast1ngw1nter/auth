@@ -26,18 +26,12 @@ namespace PhotosApp.Areas.Identity
                         options.Password.RequireLowercase = true; 
                         options.Password.RequireUppercase = false; 
                         options.Password.RequireNonAlphanumeric = false; 
-                        //**
-                        //options.Password.RequiredLength = 8; 
-                        //options.Password.RequiredUniqueChars = 1; 
-                        
                         options.SignIn.RequireConfirmedAccount = false; 
-                        //options.SignIn.RequireConfirmedEmail = true; 
-                        //
                     })
                     .AddPasswordValidator<UsernameAsPasswordValidator<PhotosAppUser>>()
-                    .AddEntityFrameworkStores<UsersDbContext>();
+                    .AddEntityFrameworkStores<UsersDbContext>()
+                    .AddErrorDescriber<RussianIdentityErrorDescriber>();
                 services.AddScoped<IPasswordHasher<PhotosAppUser>, SimplePasswordHasher<PhotosAppUser>>();
-
             });
         }
     }
