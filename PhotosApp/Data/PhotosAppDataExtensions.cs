@@ -32,6 +32,10 @@ namespace PhotosApp.Data
 
                         var users = scope.ServiceProvider.GetRequiredService<UserManager<PhotosAppUser>>();
                         users.SeedWithSampleUsersAsync().Wait();
+                        
+                        scope.ServiceProvider.GetRequiredService<TicketsDbContext>().Database.Migrate();
+                        var tickets = scope.ServiceProvider.GetRequiredService<TicketsDbContext>();
+                        tickets.SeedWithSampleTicketsAsync().Wait();
                     }
                     
                     
