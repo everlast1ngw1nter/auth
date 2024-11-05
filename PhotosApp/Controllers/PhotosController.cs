@@ -58,11 +58,13 @@ namespace PhotosApp.Controllers
             return File(photoContent.Content, photoContent.ContentType, photoContent.FileName);
         }
 
+        [Authorize(Policy = "CanAddPhoto")]
         public IActionResult AddPhoto()
         {
             return View();
         }
 
+        [Authorize(Policy = "CanAddPhoto")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPhoto(AddPhotoModel addPhotoModel)
@@ -93,6 +95,7 @@ namespace PhotosApp.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "Beta")]
         public async Task<IActionResult> EditPhoto(Guid id)
         {
             var photo = await photosRepository.GetPhotoMetaAsync(id);
@@ -107,6 +110,7 @@ namespace PhotosApp.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Policy = "Beta")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPhoto(EditPhotoModel editPhotoModel)
