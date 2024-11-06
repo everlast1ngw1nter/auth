@@ -29,17 +29,17 @@ namespace PhotosApp.Data
                         var photosDbContext = scope.ServiceProvider.GetRequiredService<PhotosDbContext>();
                         photosDbContext.SeedWithSamplePhotosAsync().Wait();
                         
-                        scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
+                        // scope.ServiceProvider.GetRequiredService<UsersDbContext>().Database.Migrate();
                         
-                        var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                        roles.SeedWithSampleRolesAsync().Wait();
+                        // var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                        // roles.SeedWithSampleRolesAsync().Wait();
 
-                        var users = scope.ServiceProvider.GetRequiredService<UserManager<PhotosAppUser>>();
-                        users.SeedWithSampleUsersAsync().Wait();
+                        // var users = scope.ServiceProvider.GetRequiredService<UserManager<PhotosAppUser>>();
+                        // users.SeedWithSampleUsersAsync().Wait();
                         
-                        scope.ServiceProvider.GetRequiredService<TicketsDbContext>().Database.Migrate();
-                        var tickets = scope.ServiceProvider.GetRequiredService<TicketsDbContext>();
-                        tickets.SeedWithSampleTicketsAsync().Wait();
+                        // scope.ServiceProvider.GetRequiredService<TicketsDbContext>().Database.Migrate();
+                        // var tickets = scope.ServiceProvider.GetRequiredService<TicketsDbContext>();
+                        // tickets.SeedWithSampleTicketsAsync().Wait();
                     }
                     
                     
