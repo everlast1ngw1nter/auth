@@ -78,6 +78,7 @@ namespace PhotosApp
                     options.SaveTokens = true;
                     // NOTE: oidc и profile уже добавлены по умолчанию
                     options.Scope.Add("email");
+                    options.Scope.Add("photos_app");
 
                     options.CallbackPath = "/signin-passport";
 options.SaveTokens = true;
