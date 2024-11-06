@@ -16,8 +16,10 @@ using System.Web;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
 
 namespace PhotosApp.Clients
@@ -214,12 +216,16 @@ namespace PhotosApp.Clients
             var accessToken = await httpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
             if (accessToken == null)
                 return new HttpResponseMessage(HttpStatusCode.Unauthorized);
-
-            var httpClient = new HttpClient();
-            request.SetBearerToken(accessToken);
-            var response = await httpClient.SendAsync(request);
-            if (response.StatusCode != HttpStatusCode.Unauthorized)
-                return response;
+            
+            var accessTokenValid = await ValidateTokenAsync(accessToken);
+            if (accessTokenValid.IsValid)
+            {
+                var httpClient = new HttpClient();
+                request.SetBearerToken(accessToken);
+                var response = await httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Unauthorized)
+                    return response;
+            }
 
             var refreshToken = await httpContext.GetTokenAsync(OpenIdConnectParameterNames.RefreshToken);
             if (refreshToken == null)
@@ -269,6 +275,35 @@ namespace PhotosApp.Clients
             await httpContext.SignInAsync(authResult.Principal, authResult.Properties);
 
             return tokenResponse.AccessToken;
+        }
+        
+        private async Task<TokenValidationResult> ValidateTokenAsync(string accessToken)
+        {
+            var httpContext = httpContextAccessor.HttpContext;
+            var oidcConfiguration = await oidcConfigurationManager.GetConfigurationAsync(httpContext.RequestAborted);
+            var issuerSigningKeys = oidcConfiguration.SigningKeys;
+            
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
+                // NOTE: Переопределение проверки подписи токена, чтобы подпись не проверялась,
+                // ведь ее не получится проверить без закрытого ключа
+                SignatureValidator = (token, validationParameters) => new JsonWebToken(token)
+            };
+            
+            // NOTE: если все же хочется проверить подпись, то переопределять не нужно
+            validationParameters.SignatureValidator = null;
+            // NOTE: для проверки подписи нужен открытый ключ сервера авторизации
+            validationParameters.IssuerSigningKeys = issuerSigningKeys;
+            // NOTE: токены совсем без подписи вообще-то надо всегда отбрасывать — они ничтожны
+            validationParameters.RequireSignedTokens = true;
+            
+            var tokenHandler = new JsonWebTokenHandler();
+            var validationResult = tokenHandler.ValidateToken(accessToken, validationParameters);
+            return validationResult;
         }
         
         private static async Task<string> GetAccessTokenByClientCredentialsAsync()
