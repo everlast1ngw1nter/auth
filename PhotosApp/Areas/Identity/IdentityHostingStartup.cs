@@ -51,7 +51,7 @@ namespace PhotosApp.Areas.Identity
                 services.ConfigureApplicationCookie(options =>
                 {
                     var serviceProvider = services.BuildServiceProvider();
-                    options.SessionStore = serviceProvider.GetRequiredService<EntityTicketStore>();
+                    //options.SessionStore = serviceProvider.GetRequiredService<EntityTicketStore>();
                     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
                     options.Cookie.Name = "PhotosApp.Auth";
                     options.Cookie.HttpOnly = true;
@@ -60,7 +60,13 @@ namespace PhotosApp.Areas.Identity
                     //using Microsoft.AspNetCore.Authentication.Cookies;
                     options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                     options.SlidingExpiration = true;
-                });
+                }).ConfigureExternalCookie(options =>
+                {
+                    options.Cookie.Name = "PhotosApp.Auth.External";
+                    options.Cookie.HttpOnly = true;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                    options.SlidingExpiration = true;
+                });;
                 services.AddScoped<IPasswordHasher<PhotosAppUser>, SimplePasswordHasher<PhotosAppUser>>();
                 services.AddScoped<IAuthorizationHandler, MustOwnPhotoHandler>();
                 services.AddAuthorization(options =>
@@ -95,10 +101,11 @@ namespace PhotosApp.Areas.Identity
                         "Dev",
                         policyBuilder =>
                         {
-                            policyBuilder.RequireRole("Dev");
-                            policyBuilder.AddAuthenticationSchemes(
-                                JwtBearerDefaults.AuthenticationScheme,
-                                IdentityConstants.ApplicationScheme);
+                            policyBuilder.RequireAuthenticatedUser();
+                            //policyBuilder.RequireRole("Dev");
+                            //policyBuilder.AddAuthenticationSchemes(
+                            //    JwtBearerDefaults.AuthenticationScheme,
+                            //    IdentityConstants.ApplicationScheme);
                         });
                 });
                 services.AddAuthentication()
@@ -121,6 +128,7 @@ namespace PhotosApp.Areas.Identity
                             options.RemoteSignOutPath = "/signout-google";
 
                             options.Scope.Add("email");
+                            //options.SaveTokens = true;
                         });
                 services.AddTransient<IEmailSender, SimpleEmailSender>(serviceProvider =>
                     new SimpleEmailSender(
